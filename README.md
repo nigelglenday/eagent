@@ -1,8 +1,11 @@
-# Claude EA Pattern — A Multi-Session Executive Assistant System
+# EAgent
 
-A starter pattern for building a personal executive assistant out of multiple coordinated [Claude Code](https://claude.com/claude-code) sessions, communicating via the file system and a shared markdown knowledge base.
+**A multi-session executive assistant pattern for [Claude Code](https://claude.com/claude-code).**
 
-> **Status:** opinionated, hand-tuned, single-user-oriented. Not a SaaS product. The pattern is designed to be forked, edited, and made your own.
+A starter for building a personal executive assistant out of multiple coordinated Claude Code sessions, communicating via the file system and a shared markdown knowledge base.
+
+> [!IMPORTANT]
+> EAgent is opinionated, hand-tuned, and single-user-oriented. It's not a SaaS product — it's a pattern designed to be forked, edited, and made your own.
 
 ## What this is
 
@@ -11,7 +14,7 @@ Multiple specialized AI sessions, each owning a narrow domain, coordinated throu
 - **One orchestrator session** — the conversational one you type into
 - **Several worker sessions** — narrow, scheduled (e.g., email triage runs on cron) or always-on
 - **File-based inter-session messaging** — drop a markdown file in another session's inbox; receiving session surfaces it automatically via hooks
-- **Shared knowledge base** — markdown wiki (people, companies, themes, decisions), optionally mirrored to a structured graph store
+- **Shared knowledge base** — markdown wiki (people, companies, themes, decisions), optionally mirrored to a parallel structured graph store like [Graphite Atlas](https://www.graphiteatlas.com)
 - **Conservative defaults** — workers surface uncertainty up to the user instead of acting autonomously
 
 ## Why this pattern
@@ -69,7 +72,7 @@ flowchart TB
     User([User at desk])
 
     subgraph Orchestrator["Orchestrator (conversational)"]
-      EA[EA orchestrator]
+      EA[EAgent orchestrator]
     end
 
     subgraph Workers["Workers (scheduled / always-on)"]
@@ -111,18 +114,23 @@ Full architecture explainer: [`docs/architecture.md`](docs/architecture.md).
 
 ## Prerequisites
 
-- **macOS** (some scripts use `open` and macOS path conventions; Linux works with minor edits)
+> [!NOTE]
+> EAgent assumes macOS. Some scripts use `open` and macOS path conventions; Linux works with minor edits.
+
 - **[Claude Code](https://claude.com/claude-code)** installed and authenticated
-- An agent registry to manage multiple sessions. This repo expects a TOML at `~/.config/a-team/agents.toml` (any compatible tool works).
+- An agent registry to manage multiple sessions. EAgent expects a TOML at `~/.config/a-team/agents.toml` — the reference implementation is [a-team](https://github.com/nigelglenday/a-team), but any compatible tool works.
 - **bash 4+**, `python3`, `jq`, `awk`, `sed` (standard on most macs / dev machines)
-- **MCP servers** as needed for your integrations — email (e.g., Superhuman), Notion, etc.
+- **MCP servers** as needed for your integrations — email (e.g., Superhuman), Notion, [Graphite Atlas](https://www.graphiteatlas.com) for a parallel graph store, etc.
 
 ## Quick start
 
+> [!TIP]
+> Keep the repo (code) and the data folder (task.md, KB, messages) separate. The repo is shareable; the data is personal. Symlinks bridge them at runtime.
+
 ```bash
 # 1. Clone
-git clone <this-repo-url> ~/code/ea
-cd ~/code/ea
+git clone <this-repo-url> ~/code/eagent
+cd ~/code/eagent
 
 # 2. Pick a data folder (where task.md, KB, messages live — keep this OUT of git)
 export EA_DATA_DIR="$HOME/Documents/ea-data"
@@ -147,13 +155,22 @@ For adding workers (triage, domain-specific loops), see [`docs/extension.md`](do
 
 ## Configuration
 
-A handful of paths are configurable. The defaults assume:
+> [!NOTE]
+> A handful of paths are configurable. Search-and-replace these in the scripts if you want to change them — they're the only hardcoded assumptions in the cleaned-up scripts.
 
-- Repo (code) at `$HOME/code/ea/` (or wherever you cloned)
+Defaults:
+
+- Repo (code) at `$HOME/code/eagent/` (or wherever you cloned)
 - Data folder at `$HOME/Documents/ea-data/` (or wherever you set `EA_DATA_DIR`)
 - Agent registry at `~/.config/a-team/agents.toml`
 
-Search-and-replace these in the scripts if you want to change them. They're the only hardcoded assumptions in the cleaned-up scripts.
+## Optional: parallel structured graph store
+
+EAgent's KB is markdown-first — that handles ~70% of practical queries via grep + wikilinks. For typed, multi-hop structural queries ("who approves wires over $100K?", "if I change System X, what processes are affected?"), mirror your KB into a parallel structured graph store.
+
+The reference implementation is [**Graphite Atlas**](https://www.graphiteatlas.com) — a knowledge graph platform with a typed ontology (Person, Position, Process, System, Outcome, etc.) and MCP server. KB markdown files cross-reference graph nodes via a `graph_uuid` field in frontmatter; graph nodes have a `kb_file` property pointing back.
+
+See [`docs/kb-schema.md`](docs/kb-schema.md) for the cross-reference convention. Any graph DB or knowledge graph product works — Atlas is just the cleanest fit for this pattern.
 
 ## How to think about this
 
@@ -164,7 +181,8 @@ Search-and-replace these in the scripts if you want to change them. They're the 
 4. [`docs/kb-schema.md`](docs/kb-schema.md) — knowledge base conventions
 5. [`docs/extension.md`](docs/extension.md) — how to add your own worker session
 
-**Don't try to use this as-is.** The templates in `.claude/CLAUDE.md` and `triage/.claude/CLAUDE.md` are starting points — edit them to match your role, your projects, your priorities. The pattern is what's valuable; the specific prose is meant to be replaced.
+> [!WARNING]
+> Don't try to use EAgent as-is. The templates in `.claude/CLAUDE.md` and `triage/.claude/CLAUDE.md` are starting points — edit them to match your role, your projects, your priorities. The pattern is what's valuable; the specific prose is meant to be replaced.
 
 ## License
 
