@@ -1,11 +1,14 @@
 # EAgent
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code-CC785C)](https://claude.com/claude-code)
+[![Platform: macOS](https://img.shields.io/badge/Platform-macOS-000000?logo=apple&logoColor=white)](https://www.apple.com/macos/)
+[![Shell: bash](https://img.shields.io/badge/Shell-bash-4EAA25?logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
+[![Knowledge Graph: Atlas](https://img.shields.io/badge/Optional_KG-Graphite_Atlas-6B5BFF)](https://www.graphiteatlas.com)
+
 **A multi-session executive assistant pattern for [Claude Code](https://claude.com/claude-code).**
 
 A starter for building a personal executive assistant out of multiple coordinated Claude Code sessions, communicating via the file system and a shared markdown knowledge base.
-
-> [!IMPORTANT]
-> EAgent is opinionated, hand-tuned, and single-user-oriented. It's not a SaaS product — it's a pattern designed to be forked, edited, and made your own.
 
 ## What this is
 
