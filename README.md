@@ -166,20 +166,6 @@ Search-and-replace these in the scripts if you want to change them. They're the 
 
 **Don't try to use this as-is.** The templates in `.claude/CLAUDE.md` and `triage/.claude/CLAUDE.md` are starting points — edit them to match your role, your projects, your priorities. The pattern is what's valuable; the specific prose is meant to be replaced.
 
-## What this is NOT
-
-- **Not a SaaS product.** Local-first, file-based, runs on one machine.
-- **Not a generic agent framework.** Every session is hand-tuned via its CLAUDE.md.
-- **Not autonomous.** Workers stay on rails defined in their CLAUDE.md. They surface uncertainty to the orchestrator + user.
-- **Not magic.** Bash + markdown + Claude Code primitives (hooks, MCP, skills, `/loop`).
-
 ## License
 
-MIT. Fork it, edit it, make it yours.
-
-## Credits
-
-Pattern inspired by:
-- Andrej Karpathy's [LLM-wiki](https://karpathy.bearblog.dev/llm-wiki/) for the three-layer knowledge base
-- The 4 Disciplines of Execution framework for priority discipline
-- A lot of trial and error
+MIT — see [LICENSE](LICENSE).
