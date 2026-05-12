@@ -1,0 +1,34 @@
+# macOS
+.DS_Store
+._.DS_Store
+
+# Claude Code — track CLAUDE.md, settings.json, commands/ (shared identity + hooks);
+# exclude per-machine permissions and internal locks
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+.claude/*.session.lock
+
+# Messages — ephemeral state
+messages/.seen-*
+# (keep messages/inbox/*/ and messages/archive/ for audit history)
+
+# Triage / orchestration ephemeral state
+.triage-state.json
+
+# Lint outputs are regeneratable
+kb/lint-reports/
+
+# Editor / OS
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Python cache (if scripts grow)
+__pycache__/
+*.pyc
+
+# Temp / scratch
+/tmp/
+*.tmp
+*.bak

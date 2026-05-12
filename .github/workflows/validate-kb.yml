@@ -1,0 +1,39 @@
+name: Validate KB
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: KB lint (schema, stale, orphans, broken wikilinks)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Skip if no kb/ in repo
+        id: kb-check
+        run: |
+          if [ ! -d "kb" ]; then
+            echo "No kb/ directory in repo (template-only). Skipping lint."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run kb-lint --strict
+        if: steps.kb-check.outputs.skip != 'true'
+        env:
+          EA_DATA_DIR: ${{ github.workspace }}
+        run: |
+          bash "$GITHUB_WORKSPACE/scripts/kb-lint.sh" --strict
+        continue-on-error: false

@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${EA_DATA_DIR:-$HOME/Documents/ea-data}/scripts/check-inbox.sh ea-triage"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${EA_DATA_DIR:-$HOME/Documents/ea-data}/scripts/check-inbox.sh ea-triage"
+          }
+        ]
+      }
+    ]
+  }
+}
