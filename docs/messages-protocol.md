@@ -42,7 +42,19 @@ send-message.sh worker-a "..." --related "issue-123,deal-x"   # add refs to fron
 send-message.sh worker-a "..." --from custom-source            # override sender
 ```
 
-Or write the file directly:
+### Or via the `/sendmsg` slash command (user-level, works in any session)
+
+If you've installed the user-level slash commands (see `user-commands/`):
+
+```
+/sendmsg worker-a Look at PR #123 — mobile regression
+/sendmsg ea Process draft ready for review --notify
+/sendmsg worker-b Urgent item — see thread X --priority urgent
+```
+
+The slash command wraps `send-message.sh` with argument parsing. The first whitespace-separated word is the recipient slug; the rest is the body. Flags `--priority urgent` and `--notify` work the same way.
+
+### Or write the file directly:
 
 ```bash
 cat > "$EA_DATA_DIR/messages/inbox/worker-a/$(date +%Y-%m-%d-%H%M)-pr-123-mobile-bug.md" <<EOF
@@ -61,13 +73,25 @@ EOF
 
 ## Receiving a message
 
-Two hooks pick up new messages automatically:
+Three mechanisms pick up new messages, in order of immediacy:
 
-1. **SessionStart hook** — fires when the user `cd`s to a session folder and runs `claude`. Reads the inbox and surfaces unread messages as a system reminder at session start. Handles the cold-start case.
+1. **fswatch notifier** (optional, separate install — see [README](../README.md#optional-macos-banner-when-a-message-lands)). Fires a macOS banner the moment a file lands. Event-driven, instant. You see the banner and click into the session.
 
-2. **PreToolUse hook** — fires before each tool call. Catches messages that arrived during an active session. Only surfaces messages newer than the `.seen-<slug>` timestamp (no spam).
+2. **SessionStart hook** — fires when the user `cd`s to a session folder and runs `claude`. Reads the inbox and surfaces unread messages as a system reminder at session start. Handles the cold-start case.
 
-Both hooks call `$EA_DATA_DIR/scripts/check-inbox.sh <slug>`.
+3. **PreToolUse hook** — fires before each tool call. Catches messages that arrived during an active session. Only surfaces messages newer than the `.seen-<slug>` timestamp (anti-spam).
+
+Both hooks call `$EA_DATA_DIR/scripts/check-inbox.sh <slug>`. The fswatch notifier runs `inbox-notifier.sh` via launchd.
+
+### Manual peek via `/checkmsg` (user-level)
+
+If you've installed the user-level slash commands, `/checkmsg` runs a manual inbox check that **ignores the `.seen` marker**:
+
+```
+/checkmsg
+```
+
+Unlike the hooks (which use `.seen` for anti-spam), the manual peek shows everything currently sitting in the inbox. Useful when a session has been idle and you want to confirm what's there. Repeatable — doesn't update the seen-marker.
 
 When the receiving session has handled the message, it should move it to archive:
 

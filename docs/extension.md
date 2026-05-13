@@ -110,6 +110,28 @@ EOF
 
 The `email-triage.md` prompt + `triage.md` command in this repo follow this pattern.
 
+### Option C — user-level slash command (available in every session)
+
+For commands you want to invoke from any Claude Code session — not just the orchestrator — put them in `~/.claude/commands/` instead of a per-session `.claude/commands/`:
+
+```bash
+cat > ~/.claude/commands/my-skill.md <<EOF
+---
+description: Short description
+---
+
+[the prompt]
+EOF
+```
+
+This repo ships three user-level commands in `user-commands/` (install with `cp user-commands/*.md ~/.claude/commands/`):
+
+| Command | Purpose |
+|---|---|
+| `/checkmsg` | Manual peek of the current session's inbox (uses `--all` to bypass anti-spam) |
+| `/sendmsg <slug> <body>` | Drop a message into another session's inbox (supports `--priority urgent`, `--notify`) |
+| `/start-triage-loops` | Arms three `/loop` cron jobs for scheduled triage. Run once in a triage worker session. |
+
 ---
 
 ## Add a new MCP
@@ -273,10 +295,13 @@ If a workstream becomes recurring:
 | I want to... | Do this |
 |---|---|
 | Trigger triage manually | `/triage` in an orchestrator session |
-| Hand work to another session | `bash scripts/send-message.sh <slug> "..."` |
+| Hand work to another session | `/sendmsg <slug> "..."` (or `bash scripts/send-message.sh`) |
+| Peek my inbox manually | `/checkmsg` (uses `--all`, bypasses anti-spam) |
 | Spawn a new project session | `bash scripts/spawn-session.sh new <slug> /path --ephemeral "[brief]"` |
 | See what sessions exist | `bash scripts/list-agents.sh` |
 | Audit / fix inbox wiring | `bash scripts/audit-inboxes.sh [--fix]` |
+| Start triage on a cron | `/start-triage-loops` in the triage worker session |
+| Get a banner when a message lands | Install the fswatch notifier — see [README](../README.md#optional-macos-banner-when-a-message-lands) |
 | Check KB health | `/kb-lint` |
 | Refresh KB catalog | `/kb-index` |
 | Remember a new person | Create `kb/people/<slug>.md`, then `bash scripts/kb-log.sh ...` |

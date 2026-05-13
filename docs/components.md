@@ -58,9 +58,11 @@ Filename convention: `YYYY-MM-DD-HHMM-short-slug.md`. Frontmatter: from / to / s
 | `spawn-session.sh <slug-or-name> [prompt]` | Launch an existing registered session |
 | `spawn-session.sh new <slug> <path> [--ephemeral] [--category <cat>]` | Register a new agent and launch |
 | `send-message.sh <to> "msg" [--from] [--priority] [--notify]` | Drop markdown into another session's inbox |
-| `check-inbox.sh [slug]` | Hook callback — surfaces unread messages, seen-file anti-spam |
+| `check-inbox.sh [slug] [--all]` | Hook callback — surfaces unread messages, seen-file anti-spam. `--all` bypasses anti-spam for manual peeks. |
 | `wire-inbox.sh <slug>` | Idempotent inbox infra wiring (settings.json + folder + CLAUDE.md boilerplate) |
 | `audit-inboxes.sh [--fix] [--skip ephemeral]` | Walk the agent registry, report (and optionally fix) gaps |
+| `inbox-notifier.sh` | fswatch daemon — fires macOS banner the moment a message lands. Install via `install-inbox-notifier.sh`. |
+| `install-inbox-notifier.sh` | One-shot installer for the fswatch + terminal-notifier daemon (handles macOS TCC). |
 
 ### Email triage
 
@@ -93,6 +95,18 @@ Filename convention: `YYYY-MM-DD-HHMM-short-slug.md`. Frontmatter: from / to / s
 | File | Purpose |
 |---|---|
 | `email-triage.md` | The brain of the `/triage` skill. Edit to fit your inboxes, projects, voice. |
+
+## `user-commands/` — user-level slash commands (install separately)
+
+These commands belong at `~/.claude/commands/` (user-level) so they work in **every** Claude Code session. Install with `cp user-commands/*.md ~/.claude/commands/`.
+
+| Command | Purpose |
+|---|---|
+| `/checkmsg` | Manual peek of the current session's inbox (uses `--all`, bypasses anti-spam) |
+| `/sendmsg <slug> <body>` | Drop a message into another session's inbox. Supports `--priority urgent` and `--notify`. |
+| `/start-triage-loops` | Arms three `/loop` cron jobs for scheduled triage (run once in a triage worker session) |
+
+See [`user-commands/README.md`](../user-commands/README.md) for install + customization details.
 
 ## `.claude/` — Claude Code session config (orchestrator)
 
