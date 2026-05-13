@@ -6,15 +6,25 @@
 # Used by SessionStart and PreToolUse hooks.
 #
 # Usage:
-#   check-inbox.sh [slug]
+#   check-inbox.sh [slug] [--all]
 #   If slug omitted, derived from $PWD via a-team registry.
+#   --all   ignore the .seen marker — list every .md file still in the inbox
+#           (use for manual peek, not for hook anti-spam)
 
 set -euo pipefail
 
 source "$(dirname "$0")/lib-slugify.sh"
 
-# Derive slug
-SLUG="${1:-}"
+# Parse args
+SLUG=""
+ALL=0
+for arg in "$@"; do
+  case "$arg" in
+    --all) ALL=1 ;;
+    *) [ -z "$SLUG" ] && SLUG="$arg" ;;
+  esac
+done
+
 if [ -z "$SLUG" ]; then
   SLUG=$(slug_from_pwd)
 fi
@@ -30,8 +40,12 @@ if [ ! -d "$INBOX" ]; then
   exit 0
 fi
 
-# Find unread messages (newer than last-seen, or all if no seen file)
-if [ -f "$SEEN_FILE" ]; then
+# Find unread messages.
+# Manual peek (--all): list everything still sitting in inbox/ (un-archived).
+# Hook mode (default): only files newer than the .seen marker, with anti-spam.
+if [ "$ALL" -eq 1 ]; then
+  UNREAD=$(find "$INBOX" -name "*.md" 2>/dev/null)
+elif [ -f "$SEEN_FILE" ]; then
   UNREAD=$(find "$INBOX" -name "*.md" -newer "$SEEN_FILE" 2>/dev/null)
 else
   UNREAD=$(find "$INBOX" -name "*.md" 2>/dev/null)
@@ -61,7 +75,10 @@ EOF
 
   echo "</system-reminder>"
 
-  touch "$SEEN_FILE"
+  # Only touch the seen marker in hook mode. Manual --all peek should be repeatable.
+  if [ "$ALL" -eq 0 ]; then
+    touch "$SEEN_FILE"
+  fi
 fi
 
 # EA orchestrator also surfaces new triage digests since last EA session start.
