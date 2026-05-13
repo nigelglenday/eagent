@@ -33,6 +33,19 @@ if ! command -v fswatch >/dev/null 2>&1; then
 fi
 echo "✓ fswatch is installed ($(fswatch --version | head -1))"
 
+# 1b. Check terminal-notifier (strongly recommended — osascript notifications are
+#     often silently suppressed by macOS in launchd context)
+if ! command -v terminal-notifier >/dev/null 2>&1; then
+  echo "⚠ terminal-notifier not installed. Notifications via osascript are often"
+  echo "  silently suppressed by macOS when fired from launchd. Strongly recommended:"
+  echo "    brew install terminal-notifier"
+  echo ""
+  echo "  Continuing with osascript fallback — but expect to need this fix if you"
+  echo "  don't see banners. Re-run this installer after installing terminal-notifier."
+else
+  echo "✓ terminal-notifier is installed ($(terminal-notifier -help 2>&1 | head -1 | tr -d '\n'))"
+fi
+
 # 2. Verify data folder + inbox root exists
 if [ ! -d "$EA_DATA_DIR/messages/inbox" ]; then
   echo "✗ Inbox root not found: $EA_DATA_DIR/messages/inbox"
@@ -113,6 +126,14 @@ To test:
 
 You should see a macOS banner: "📨 ea has new message: test notification"
 (Then archive the test: mv \$EA_DATA_DIR/messages/inbox/ea/*test* \$EA_DATA_DIR/messages/archive/)
+
+If you DON'T see a banner, but the daemon log shows "notifying: ..." entries:
+  1. Check System Settings → Notifications → terminal-notifier (or Script Editor
+     if you're on the osascript fallback) — make sure "Allow Notifications" is ON.
+  2. If the app isn't in the Notifications list, run it manually once first:
+       terminal-notifier -title test -message test
+     macOS should prompt for permission on first use.
+  3. Check that Focus / Do Not Disturb isn't active (status bar, top-right).
 
 To stop:
   launchctl unload $PLIST

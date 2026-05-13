@@ -165,9 +165,12 @@ The SessionStart + PreToolUse hooks only fire on session activity. If a session 
 To close that gap, install the **fswatch notifier** — a tiny background daemon that watches `messages/inbox/` for new files and fires a macOS notification the moment one appears:
 
 ```bash
-brew install fswatch
+brew install fswatch terminal-notifier
 bash scripts/install-inbox-notifier.sh
 ```
+
+> [!NOTE]
+> `terminal-notifier` is strongly recommended. macOS often silently suppresses `osascript`-based notifications when fired from launchd context, since they inherit Script Editor's permission state. `terminal-notifier` has its own bundle ID and gets a clean permission prompt on first use. The installer will warn if it's not installed.
 
 What it does:
 - Copies the watcher to `~/Library/Application Support/eagent/` (macOS TCC requires this — launchd can't read scripts under `~/Documents/` without Full Disk Access)

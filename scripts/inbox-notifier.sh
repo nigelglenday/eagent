@@ -49,9 +49,22 @@ fswatch \
       # Strip the timestamp prefix (YYYY-MM-DD-HHMM-) to get a readable title
       title=$(echo "$filename" | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-[0-9]\{4\}-//' | tr '-' ' ')
 
-      # Sanitize for AppleScript embedding: backslashes and quotes
+      # Sanitize for embedding in shell / AppleScript args: backslashes and quotes
       safe_slug=$(printf '%s' "$slug" | sed 's/\\/\\\\/g; s/"/\\"/g')
       safe_title=$(printf '%s' "$title" | sed 's/\\/\\\\/g; s/"/\\"/g')
 
-      osascript -e "display notification \"$safe_title\" with title \"📨 $safe_slug has new message\"" >/dev/null 2>&1 || true
+      echo "$(date '+%Y-%m-%dT%H:%M:%S') notifying: $slug / $title" >&2
+
+      # Prefer terminal-notifier (gets its own notification permission, more reliable
+      # than osascript which inherits Script Editor's permission and is often silently
+      # suppressed by macOS in launchd context). Fall back to osascript if not installed.
+      if command -v terminal-notifier >/dev/null 2>&1; then
+        terminal-notifier \
+          -title "📨 $safe_slug has new message" \
+          -message "$safe_title" \
+          -group "eagent-inbox-$safe_slug" \
+          2>&1 >&2 || true
+      else
+        osascript -e "display notification \"$safe_title\" with title \"📨 $safe_slug has new message\"" 2>&1 >&2 || true
+      fi
     done
