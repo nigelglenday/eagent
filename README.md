@@ -54,6 +54,8 @@ Multiple specialized AI sessions, each owning a narrow domain, coordinated throu
 │   ├── kb-log.sh                # append a change entry to the KB feed
 │   ├── kb-lint.sh               # audit KB for orphans, stale entries, schema violations
 │   ├── snapshot.sh              # auto-commit data folder daily
+│   ├── inbox-notifier.sh        # fswatch daemon: macOS banner when a message lands
+│   ├── install-inbox-notifier.sh  # one-shot installer for the notifier (launchd)
 │   └── templates/
 │       └── inbox-claude-section.md  # boilerplate injected into new agent CLAUDE.mds
 ├── .claude/
@@ -155,6 +157,27 @@ cd "$EA_DATA_DIR" && claude
 ```
 
 For adding workers (triage, domain-specific loops), see [`docs/extension.md`](docs/extension.md).
+
+## Optional: macOS banner when a message lands
+
+The SessionStart + PreToolUse hooks only fire on session activity. If a session is **open and idle** when a new message arrives, nothing surfaces until you act on the session.
+
+To close that gap, install the **fswatch notifier** — a tiny background daemon that watches `messages/inbox/` for new files and fires a macOS notification the moment one appears:
+
+```bash
+brew install fswatch
+bash scripts/install-inbox-notifier.sh
+```
+
+What it does:
+- Copies the watcher to `~/Library/Application Support/eagent/` (macOS TCC requires this — launchd can't read scripts under `~/Documents/` without Full Disk Access)
+- Generates a `launchd` plist at `~/Library/LaunchAgents/com.eagent.inbox-notifier.plist`
+- Loads it (starts at login, restarts on death)
+- Logs go to `~/Library/Logs/eagent-inbox-notifier{.log,.err.log}`
+
+You'll see a banner like "📨 worker-a has new message: <title>" whenever any session drops a message in any inbox. Clicking into the session triggers the normal hook flow that surfaces it.
+
+To uninstall, see the messages printed at the end of the installer.
 
 ## Configuration
 
