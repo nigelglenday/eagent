@@ -66,6 +66,10 @@ Multiple specialized AI sessions, each owning a narrow domain, coordinated throu
 │   └── .claude/
 │       ├── CLAUDE.md            # triage worker system prompt (template)
 │       └── settings.json
+├── user-commands/               # user-level slash commands (install to ~/.claude/commands/)
+│   ├── checkmsg.md              # /checkmsg — manual peek of current session's inbox
+│   ├── sendmsg.md               # /sendmsg <slug> <body> — drop a message in another session
+│   └── start-triage-loops.md    # /start-triage-loops — arm 3 cron jobs for triage worker
 └── .github/workflows/
     └── validate-kb.yml          # CI: lint the KB on push
 ```
@@ -146,13 +150,17 @@ ln -s "$PWD/.claude" "$EA_DATA_DIR/.claude"
 ln -s "$PWD/scripts" "$EA_DATA_DIR/scripts"
 ln -s "$PWD/prompts" "$EA_DATA_DIR/prompts"
 
-# 4. Customize the orchestrator's CLAUDE.md
+# 4. Install user-level slash commands (works in every Claude Code session)
+mkdir -p ~/.claude/commands
+cp user-commands/*.md ~/.claude/commands/
+
+# 5. Customize the orchestrator's CLAUDE.md
 # Open .claude/CLAUDE.md — replace placeholders (your role, priorities, projects, key people)
 
-# 5. Register the orchestrator with your agent registry
+# 6. Register the orchestrator with your agent registry
 a-team new "My EA" "$EA_DATA_DIR"
 
-# 6. Launch
+# 7. Launch
 cd "$EA_DATA_DIR" && claude
 ```
 
