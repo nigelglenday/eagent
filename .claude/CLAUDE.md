@@ -61,27 +61,39 @@ When slotting tasks:
 ## task.md Rules
 
 - **Location:** `$EA_DATA_DIR/task.md` (or a synced path of your choice, e.g., iCloud for iPhone widget visibility)
-- **Sections:** {{ choose your top-level groupings — typically by domain }}
+- **No prose preamble at the top.** Do NOT write Assistant's Note paragraphs, triage summary blockquotes, or weekly-priority blocks. The file is: `# Tasks` + `*Updated: YYYY-MM-DD*` + (optional) one row of navigation reference links + sections. No prose between the nav links and the first task.
+- **Sections:** {{ choose your top-level groupings, typically by domain }}
 - Checkboxes `- [ ]` for actionable items
 - Keep it minimal, scannable, short lines
 - Update the `Updated:` date on every edit
-- Every task gets a time block: `⏱15min`, `⏱30min`, `⏱1hr`, `⏱2hr`. Aggressive targets, not careful estimates — helps the user see that most things aren't a full day.
+- Every task gets a time block: `⏱15min`, `⏱30min`, `⏱1hr`, `⏱2hr`. Aggressive targets, not careful estimates: helps the user see that most things aren't a full day.
 - **Always link drafts/docs to tasks.** Every draft, spec, or reference doc MUST be linked from the task so it can be clicked open. Never create a draft without linking it.
-- **Every task must be SMART** — Specific, Measurable, Achievable, Relevant, Time-bound. No vague tasks. If a task can't pass SMART, it's not a task — it's a thought. Push back or sharpen it before adding.
+- **Every task must be SMART**: Specific, Measurable, Achievable, Relevant, Time-bound. No vague tasks. If a task can't pass SMART, it's not a task, it's a thought. Push back or sharpen it before adding.
+- **Edit/view in Obsidian (recommended).** `$EA_DATA_DIR` works well as an Obsidian vault: auto-refresh when the agent writes, click-to-edit any line, wikilinks compatible with `kb/`. Chrome / Markdown viewers are fine for read-only but tend to lag on file changes.
+- **Commit on every write.** After any write to `task.md`, run `bash scripts/commit-task.sh "<actor>: <description>"` so git captures the change. Per-write commits give intra-day history; the daily snapshot cron is the safety net.
 
-### Handling `[T]`-tagged tasks (from the triage worker)
+### Reply strip at top of each section (from the triage worker)
 
-The triage worker appends candidate tasks to `task.md` with a `[T]` prefix (e.g. `- [ ] [T] [D] Reply to X on Y status — confirm by Friday ⏱15min`). They land at the bottom of the right section, never reordered.
+The triage worker writes a `📨 Replies` mini-section at the top of each project section. Format:
 
-When you see `[T]` items at session start (the SessionStart hook flags them along with new digests), do this:
+```markdown
+## {Section}
 
-1. **Review each `[T]` item** against WIG / role tag / Priority Rulebook
-2. **Promote** — if it deserves higher priority, move it up in the section. Strip the `[T]` tag once curated.
-3. **Demote / kill** — if it's noise or duplicates an existing task, delete it. Note in the Assistant's Note why.
-4. **Sharpen** — if it's not SMART, rewrite it (or push back to the user for clarity)
-5. **Keep `[URGENT]` items at top of section** until done — those came from triage's "can't wait" classification, treat as top priority unless you disagree
+### 📨 Replies
+- [ ] Reply to {Contact} on {topic}. [📧](https://mail.superhuman.com/thread/<thread_id>) ⏱15min
+- [ ] Confirm {Contact} on {meeting context}. [📧](https://mail.superhuman.com/thread/<thread_id>) ⏱5min
 
-The `[T]` tag is the marker that something is candidate, not curated. Strip it only when you've made the priority call.
+(curated tasks below)
+```
+
+- **Plain task lines, no tag prefix.** Role tags ([T]/[D]/[O]) are internal-only: the worker filters by role internally (e.g., only Do/Own enters the strip) but never shows tags to the user.
+- **Rewritten every cycle.** Idempotent. Sent-folder scan removes replied items by simply not re-including them in the next rewrite.
+- **No cap, no age marker on the line.** Length is signal. Items >7 days standing get promoted out to the main task list with a `(7d stale)` suffix.
+- **The orchestrator can demote/kill items** at session start if they're noise. The strip is a queue, not a contract.
+
+### Learning loop
+
+Each triage cycle diffs `task.md` against `.ea-task-snapshot.md` (the worker's last write). Deletions, edits, completions, and annotations get logged to `kb/themes/task-learnings.md`. Patterns surface in the digest after enough instances. See `prompts/email-triage.md` for the full schema.
 
 ---
 

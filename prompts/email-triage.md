@@ -131,19 +131,88 @@ This appends to `kb/log.md`, the chronological feed of KB changes.
 
 ## task.md updates
 
-Append new tasks to the relevant section. Format:
+`task.md` is the user's daily surface. Most users read it once in the morning and distill to whatever they actually work from (paper journal, sticky note, Apple Reminders, etc.). Keep it clean.
+
+### Rule 1: No preamble. Tasks only.
+
+Do NOT write Assistant's Note paragraphs, triage summary blockquotes, or weekly-priority blocks at the top of `task.md`. The file starts with `# Tasks` + `*Updated: YYYY-MM-DD*` and goes straight into sections. Triage summaries belong in the digest, not on the user's main surface.
+
+### Rule 2: Reply strip at top of each project section
+
+Each project section gets a `📨 Replies` mini-section at the very top, above the curated tasks. Format:
+
+```markdown
+## {Section}
+
+### 📨 Replies
+- [ ] Reply to {Contact} on {topic summary}. [📧](https://mail.superhuman.com/thread/<thread_id>) ⏱15min
+- [ ] Confirm {Contact} on {scheduling context}. [📧](https://mail.superhuman.com/thread/<thread_id>) ⏱5min
+- [ ] Punch back to {Contact} on {question}. [📧](https://mail.superhuman.com/thread/<thread_id>) ⏱10min
+
+(curated tasks below, unchanged)
+```
+
+**Strip rules:**
+
+- **Rewrite the strip in full every cycle.** Idempotent. No duplicate management. If an item still needs a reply, it goes back in; if not, it doesn't.
+- **Plain task lines.** No `[T]`, no `[D]`, no `[O]` prefix. Role tags are worker-internal metadata, never user-facing. Filter internally by role: only Do/Own gets into the strip. Escalate/Support stays in digest prose only.
+- **Mail-provider link required.** Embed the thread ID from your mail MCP as `[📧](<provider-thread-url>/<thread_id>)`. The example above uses Superhuman; adapt the URL pattern to whichever mail provider's MCP you've wired up.
+- **No age marker on the line.** Keep it clean. If an item has been sitting >7 days, surface it in the digest (separate section), don't decorate the task line.
+- **No cap.** Include everything that passes the Do/Own filter. Length is a signal.
+- **Sent-folder scan handles cleanup.** If the user replied since the last cycle, simply don't re-include the item in the rewritten strip.
+
+### Rule 3: Outbound commitments go in the main task list, NOT the reply strip
+
+If the user said "I'll send the deck Friday" in a sent reply, capture that as a regular task below the strip:
 
 ```
-- [ ] **Short task title** — context. ⏱time-estimate
+- [ ] **Send deck to {Contact}** — committed in reply YYYY-MM-DD. ⏱30min
 ```
 
-Prefix with role tag in brackets:
+It's not a reply anymore once it's been sent; it's a deliverable. The reply strip stays scoped to inbound-needs-response.
 
-```
-- [ ] **[D] Reply to Jane Doe** — confirm 5/14 call ⏱5min
+### Rule 4: Promote stale items
+
+If an item has been in the strip >7 days AND has not been replied to, promote it OUT of the strip into the main task list with a `(7d stale)` suffix. Forces a conscious reply-or-kill decision.
+
+### After every task.md write: commit
+
+Run:
+
+```bash
+bash scripts/commit-task.sh "triage: cycle YYYY-MM-DD HHam/pm: N replies, M removals"
 ```
 
-If a task already exists for this thread, update its description rather than adding a duplicate.
+Commit message variations:
+- `triage: cycle 2026-05-14 04pm: 7 replies, 2 removals` (regular cycle)
+- `triage: promoted stale reply to main list — {short desc}` (Rule 4 promotion)
+- `triage: sent-scan removed reply — {short desc} (user replied to {contact})` (auto-cleanup)
+- `triage: added commitment from sent — {short desc}` (outbound capture)
+
+---
+
+## Learning loop: diff `task.md` against your snapshot
+
+Before doing anything in a cycle:
+
+1. Read `$EA_DATA_DIR/.ea-task-snapshot.md` (your last write to `task.md`)
+2. Read current `$EA_DATA_DIR/task.md`
+3. Diff. Anything different = the user (or another agent) edited it between cycles.
+4. For each diff hunk, classify and log to `$EA_DATA_DIR/kb/themes/task-learnings.md`:
+
+| Change type | Signal | Log format |
+|---|---|---|
+| **Line removed** | User rejected the task. Was it bad framing, wrong priority, irrelevant? | `- YYYY-MM-DD HHam/pm — DELETED: "{task text}" — added at {prior cycle}, tag {tag}, contact {contact}. Possible reason: {your guess}` |
+| **Line edited** | Vocabulary or framing change. Capture the diff. | `- YYYY-MM-DD HHam/pm — EDITED: from "{before}" to "{after}". Pattern: {your guess at the rule}` |
+| **Line completed** (`[ ]` → `[x]`) | Success signal. Task was useful. | `- YYYY-MM-DD HHam/pm — COMPLETED: "{task text}" — added at {prior cycle}` |
+| **Line annotated** (user appended a comment) | Context you missed. | `- YYYY-MM-DD HHam/pm — ANNOTATED: "{task text}" — user added "{annotation}"` |
+
+After you've finished writing the cycle's updates to `task.md`, **refresh the snapshot**: `cp task.md .ea-task-snapshot.md`. Then commit both.
+
+Surface patterns to the user in the digest's "Questions" section when:
+- Same contact appears in 3+ DELETIONS (don't queue replies to that person)
+- Same vocabulary swap appears in 5+ EDITS (user wants a different word)
+- A task type sees >50% deletion rate over 10+ instances (the heuristic creating it is wrong)
 
 ---
 
