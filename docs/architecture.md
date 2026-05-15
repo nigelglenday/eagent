@@ -137,6 +137,43 @@ Launchd is right for mechanical scripts (daily snapshots, time logging). It's wr
 
 ---
 
+## task.md as the user's daily surface
+
+`task.md` is the single artifact the user actually reads each day (most users distill from it into whatever they actually work from: bullet journal, sticky note, Apple Reminders). The orchestrator's job is to keep it minimal, scannable, and trustworthy. Three conventions support this:
+
+### Reply strip
+
+The triage worker writes a `📨 Replies` mini-section at the top of each project section in `task.md`. One plain-text line per inbound that needs a reply, with a one-click link to the source email thread (e.g., `[📧](https://mail.superhuman.com/thread/<id>)`). Filter is internal: only role tags Do/Own enter the strip; Escalate/Support stay in the digest. The strip is rewritten in full every cycle (idempotent). Items the user already replied to drop out automatically via the sent-folder scan. Items still pending after 7 days get promoted out to the main task list with a `(7d stale)` suffix, forcing a conscious reply-or-kill decision.
+
+The strip exists because reply-needed items in digest prose vanish each cycle and never reach `task.md`. Putting them on the user's daily surface, with a one-click link, is what turns "I should reply" into "I'm clicking through now."
+
+### Triage log
+
+A rolling, scannable log at `triage-log.md` (newest at top): one short entry per triage cycle — headline + open questions + strip delta + link to the full digest in `inbox-digests/`. The triage log is linked from the navigation row of `task.md` so the user can jump from their daily surface to recent triage activity in one click. Full per-cycle digests still live in `inbox-digests/`; the log is the index. Matches the [Karpathy llm-wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) `log.md` pattern.
+
+### Learning loop
+
+Before each triage cycle, the worker diffs current `task.md` against `.ea-task-snapshot.md` (worker's last write). Anything different = the user (or another agent) edited the file between cycles. Each diff hunk gets classified and logged to `kb/themes/task-learnings.md`:
+
+- **Line removed**: user rejected the task (was it bad framing, wrong priority, irrelevant?)
+- **Line edited**: vocabulary or framing change (capture before → after)
+- **Line completed** (`[ ]` → `[x]`): success signal, the task was useful
+- **Line annotated** (user appended a comment): context the worker missed
+
+After enough instances in a pattern, the worker surfaces it to the user in the digest's questions section with a proposed rule update (e.g., "stop queuing replies to {contact}", "use {word} instead of {other word}"). After writing the cycle's updates, the worker refreshes `.ea-task-snapshot.md` to match the new state.
+
+### Per-write git commits
+
+The data folder is a git repo. The worker runs `scripts/commit-task.sh "<actor>: <description>"` after every write to `task.md`, capturing `task.md` + `.ea-task-snapshot.md` + `.ea-task-state.json` in one commit. Commit messages tag the actor so the audit trail is clean:
+
+- `triage: cycle 2026-05-14 04pm: 7 replies, 2 removals`
+- `triage: sent-scan removed reply — {short desc}`
+- `triage: promoted stale reply to main list`
+
+Pair with a daily snapshot cron (`scripts/snapshot.sh`) as the safety net for any writes the worker didn't commit. Recovery: `git log --oneline task.md`, `git diff HEAD~3 task.md`, `git checkout HEAD~5 -- task.md`.
+
+---
+
 ## DOES framework (project-role tagging)
 
 Every project gets a tag: **D**o, **O**wn, **E**scalate, **S**upport. Drives how the triage worker handles inbound related to that project.

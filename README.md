@@ -1,11 +1,13 @@
 ```
- ___  ___,                      
-/ (_)/   |                      
-\__ |    |   __,  _   _  _  _|_ 
-/   |    |  /  | |/  / |/ |  |  
-\___/\__/\_/\_/|/|__/  |  |_/|_/
-              /|                
-              \|                
+ ____    ______                         __      
+/\  _`\ /\  _  \                       /\ \__   
+\ \ \L\_\ \ \L\ \     __      __    ___\ \ ,_\  
+ \ \  _\L\ \  __ \  /'_ `\  /'__`\/' _ `\ \ \/  
+  \ \ \L\ \ \ \/\ \/\ \L\ \/\  __//\ \/\ \ \ \_ 
+   \ \____/\ \_\ \_\ \____ \ \____\ \_\ \_\ \__\
+    \/___/  \/_/\/_/\/___L\ \/____/\/_/\/_/\/__/
+                      /\____/                   
+                      \_/__/                    
 ```
 
 # EAgent
@@ -29,6 +31,9 @@ Multiple specialized AI sessions, each owning a narrow domain, coordinated throu
 - **Several worker sessions** — narrow, scheduled (e.g., email triage runs on cron) or always-on
 - **File-based inter-session messaging** — drop a markdown file in another session's inbox; receiving session surfaces it automatically via hooks
 - **Shared knowledge base** — markdown wiki (people, companies, themes, decisions), optionally mirrored to a parallel structured graph store like [Graphite Atlas](https://www.graphiteatlas.com)
+- **Reply queue in `task.md`** — triage maintains a `📨 Replies` strip at the top of each project section with one-click links to the source email thread, rewritten every cycle
+- **Triage log + edit-feedback loop** — short rolling log of every triage cycle (`triage-log.md`) linked from `task.md`; each cycle diffs `task.md` against a snapshot to learn from the user's deletions, edits, completions, and annotations (`kb/themes/task-learnings.md`)
+- **Per-write git commits** — `scripts/commit-task.sh` commits `task.md` after every worker write, giving intra-day audit history alongside the daily snapshot cron
 - **Conservative defaults** — workers surface uncertainty up to the user instead of acting autonomously
 
 ## Why this pattern
@@ -64,7 +69,8 @@ Multiple specialized AI sessions, each owning a narrow domain, coordinated throu
 │   ├── kb-index.sh              # regenerate the KB catalog
 │   ├── kb-log.sh                # append a change entry to the KB feed
 │   ├── kb-lint.sh               # audit KB for orphans, stale entries, schema violations
-│   ├── snapshot.sh              # auto-commit data folder daily
+│   ├── snapshot.sh              # auto-commit data folder daily (safety net)
+│   ├── commit-task.sh           # commit task.md + worker state after every write (intra-day audit)
 │   ├── inbox-notifier.sh        # fswatch daemon: macOS banner when a message lands
 │   ├── install-inbox-notifier.sh  # one-shot installer for the notifier (launchd)
 │   └── templates/
@@ -105,6 +111,8 @@ flowchart TB
       KB[(KB markdown wiki)]
       Graph[(Optional structured graph store)]
       Tasks[(task.md)]
+      TriageLog[(triage-log.md)]
+      Digests[(inbox-digests/)]
       Inboxes[(messages/inbox/&lt;slug&gt;)]
     end
 
@@ -115,11 +123,16 @@ flowchart TB
     end
 
     User <--> EA
+    User -.daily glance.-> Tasks
+    Tasks -.nav link.-> TriageLog
+    TriageLog -.per-cycle drilldown.-> Digests
     EA --> KB
     EA --> Tasks
     EA --> Inboxes
     Triage --> KB
     Triage --> Tasks
+    Triage --> TriageLog
+    Triage --> Digests
     Triage --> Inboxes
     Triage <--> Email
     Triage <--> Notion
@@ -155,6 +168,9 @@ cd ~/code/eagent
 # 2. Pick a data folder (where task.md, KB, messages live — keep this OUT of git)
 export EA_DATA_DIR="$HOME/Documents/ea-data"
 mkdir -p "$EA_DATA_DIR"/{kb/{people,companies,themes,decisions},messages/{inbox,archive},inbox-digests,drafts}
+# Seed the task surface
+touch "$EA_DATA_DIR"/{task.md,triage-log.md,.ea-task-snapshot.md,.ea-task-state.json}
+touch "$EA_DATA_DIR"/kb/themes/task-learnings.md
 
 # 3. Symlink the orchestrator's config into the data folder
 ln -s "$PWD/.claude" "$EA_DATA_DIR/.claude"

@@ -10,7 +10,12 @@ The user's data folder (`$EA_DATA_DIR`, e.g., `$HOME/Documents/ea-data/`) is own
 
 | File | Role | Update cadence |
 |---|---|---|
-| `task.md` | Master task list | Daily |
+| `task.md` | Master task list (with `📨 Replies` strip per project section) | Every triage cycle + ad-hoc |
+| `triage-log.md` | Rolling log of triage cycles (newest at top), linked from `task.md` | Every triage cycle |
+| `inbox-digests/` | Full per-cycle triage digests, one file per cycle | Every triage cycle |
+| `.ea-task-snapshot.md` | Worker's last write to `task.md` (used to diff against current for the learning loop) | Every triage cycle |
+| `.ea-task-state.json` | Worker state metadata (last write timestamp, schema version) | Every triage cycle |
+| `kb/themes/task-learnings.md` | Diff log: what the user deleted / edited / completed / annotated in `task.md` | Every triage cycle |
 | `wafm.md` | Weekly "what actually matters" / WIGs | Weekly |
 | `<role>-sync.md` | 1:1 agenda for a particular stakeholder | Per 1:1 |
 | `projects.md` | Project register with DOES tags | When projects start/finish/change role |
@@ -88,7 +93,8 @@ Filename convention: `YYYY-MM-DD-HHMM-short-slug.md`. Frontmatter: from / to / s
 
 | Script | Purpose |
 |---|---|
-| `snapshot.sh` | Daily auto-commit of the data folder (run by launchd) |
+| `snapshot.sh` | Daily auto-commit of the data folder (run by launchd, safety net) |
+| `commit-task.sh` | Commit `task.md` + worker state (`.ea-task-snapshot.md`, `.ea-task-state.json`) after every worker write. Intra-day audit trail; complements `snapshot.sh`. |
 
 ## `prompts/` — skill prompts
 
