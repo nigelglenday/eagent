@@ -95,6 +95,10 @@ The triage worker writes a `📨 Replies` mini-section at the top of each projec
 
 Each triage cycle diffs `task.md` against `.ea-task-snapshot.md` (the worker's last write). Deletions, edits, completions, and annotations get logged to `kb/themes/task-learnings.md`. Patterns surface in the digest after enough instances. See `prompts/email-triage.md` for the full schema.
 
+### Triage log (`triage-log.md`)
+
+EA-TRIAGE maintains a rolling log at `$EA_DATA_DIR/triage-log.md`: short entry per cycle (headline + open questions + strip delta + link to the full digest), newest at top. The link to `triage-log.md` belongs in the navigation row of `task.md` so the user can jump from their daily surface to recent triage activity in one click. Full per-cycle digests still live in `inbox-digests/`; the log is the index.
+
 ---
 
 ## Knowledge base (`kb/`)

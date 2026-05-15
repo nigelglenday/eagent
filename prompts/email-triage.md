@@ -20,7 +20,23 @@ Use the right MCP per account. Don't cross-pollinate.
 
 ## What you produce per cycle
 
-A single digest file at `$EA_DATA_DIR/inbox-digests/YYYY-MM-DD-HHam.md` (or pm) with:
+Two files:
+
+1. **Full digest** at `$EA_DATA_DIR/inbox-digests/YYYY-MM-DD-HHam.md` (or pm). The detailed write-up. Format below.
+2. **Triage log entry** prepended to the top of `$EA_DATA_DIR/triage-log.md`. Short, scannable. This is the file linked from `task.md` so the user can browse cycles from their daily surface in one click. Format:
+
+   ```markdown
+   ## YYYY-MM-DD HH:MMam/pm
+
+   **Headline:** {one sentence, same as the v1 footer line of the full digest}.
+   **Questions:** {comma-separated one-line summary of Questions for the user; "none flagged" if none}.
+   **Strip delta:** {+N reply / -M removed, or ±0 if no changes}.
+   [Full digest](inbox-digests/YYYY-MM-DD-HHam.md)
+   ```
+
+   Insert the new entry directly after the `---` divider at the top of `triage-log.md`, before the most recent prior entry. Do NOT overwrite or summarize existing entries.
+
+The full digest contains:
 
 1. Volume summary across the accounts (read / unread / processed this cycle)
 2. **Action queue** — emails that need the user's attention, grouped by urgency
