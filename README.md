@@ -16,7 +16,7 @@
 [![Platform: macOS](https://img.shields.io/badge/Platform-macOS-000000?logo=apple&logoColor=white)](https://www.apple.com/macos/)
 [![Shell: bash](https://img.shields.io/badge/Shell-bash-4EAA25?logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
 [![Knowledge Graph: Atlas](https://img.shields.io/badge/Optional_KG-Graphite_Atlas-6B5BFF)](https://www.graphiteatlas.com)
-[![Suite: termpaper](https://img.shields.io/badge/suite-termpaper-cyan)](#related-tools)
+[![Set: termpaper](https://img.shields.io/badge/set-termpaper-cyan)](#related-tools)
 
 **A multi-session executive assistant pattern for [Claude Code](https://claude.com/claude-code).**
 
