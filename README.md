@@ -249,14 +249,12 @@ See [`docs/kb-schema.md`](docs/kb-schema.md) for the cross-reference convention.
 
 ## Related tools
 
-`eagent` is part of the **termpaper** set — four utilities for managing Claude Code state from the terminal:
+`eagent` is part of [**termpaper.dev**](https://termpaper.dev), a set of utilities for managing Claude Code state from the terminal:
 
 - **[a-team](https://github.com/nigelglenday/a-team)** — parallel sessions: pick, launch, and restore Claude Code windows in Ghostty. EAgent uses a-team's TOML registry to know what sessions exist.
 - **[whispertty](https://github.com/nigelglenday/whispertty)** — record + transcribe + diarize audio from the terminal.
 - **[skillbox](https://github.com/nigelglenday/skillbox)** — inventory and manage skills, slash commands, and subagents.
 - **[eagent](https://github.com/nigelglenday/eagent)** — multi-session executive assistant pattern, file-based messaging (this repo).
-
-See [termpaper.dev](https://termpaper.dev) for the full set.
 
 ## License
 
