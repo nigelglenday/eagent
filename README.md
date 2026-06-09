@@ -247,6 +247,10 @@ See [`docs/kb-schema.md`](docs/kb-schema.md) for the cross-reference convention.
 > [!WARNING]
 > Don't try to use EAgent as-is. The templates in `.claude/CLAUDE.md` and `triage/.claude/CLAUDE.md` are starting points — edit them to match your role, your projects, your priorities. The pattern is what's valuable; the specific prose is meant to be replaced.
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
+
 ## Related tools
 
 `eagent` is part of [**termpaper.dev**](https://termpaper.dev), a set of utilities for managing Claude Code state from the terminal:
