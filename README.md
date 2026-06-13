@@ -18,9 +18,9 @@
 [![Knowledge Graph: Atlas](https://img.shields.io/badge/Optional_KG-Graphite_Atlas-6B5BFF)](https://www.graphiteatlas.com)
 [![Set: termpaper](https://img.shields.io/badge/set-termpaper-cyan)](#related-tools)
 
-**A multi-session executive assistant pattern for [Claude Code](https://claude.com/claude-code).**
+**A file-based inter-session messaging system and orchestrator pattern for [Claude Code](https://claude.com/claude-code).** Multiple Claude Code sessions (an EA, a code agent, a triage worker, etc.) coordinate by dropping markdown files into each other's inboxes. No daemon, no broker, no polling cost when nothing's there.
 
-Part of [**termpaper.dev**](https://termpaper.dev), a set of utilities for managing Claude Code from the terminal. Built on top of [**a-team**](https://github.com/nigelglenday/a-team), which provides the session registry and launcher: EAgent layers the orchestration, file-based inter-session messaging, and shared knowledge base on top.
+Part of [**termpaper.dev**](https://termpaper.dev), a set of utilities for managing Claude Code from the terminal. Built on top of [**a-team**](https://github.com/nigelglenday/a-team), which provides the session registry and launcher: EAgent layers the inter-session messaging protocol, an orchestrator-agent pattern, and a shared markdown knowledge base on top.
 
 A starter for building a personal executive assistant out of multiple coordinated Claude Code sessions, communicating via the file system and a shared markdown knowledge base.
 
